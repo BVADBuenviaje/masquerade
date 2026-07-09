@@ -42,7 +42,7 @@ io.on('connection', (socket: Socket) => {
       id: roomCode,
       players: [newPlayer],
       state: 'Lobby',
-      settings: { turnDuration: 20, maxRounds: 5, discussionLength: 60 },
+      settings: { turnDuration: 20, maxRounds: 5, discussionLength: 180 },
       currentRound: 1,
       activePlayerId: null,
       wordHistory: [],
