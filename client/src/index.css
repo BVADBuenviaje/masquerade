@@ -1,1 +1,35 @@
 @import "tailwindcss";
+
+body {
+  position: relative;
+  background-color: #020617;
+  /* slate-950 */
+  min-height: 100vh;
+}
+
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background-image: url('/background-masquerade.png');
+  background-size: 300px;
+  background-repeat: repeat;
+  background-position: center;
+  opacity: 0.05;
+  pointer-events: none;
+  z-index: 0;
+}
+
+#root {
+  position: relative;
+  z-index: 1;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.animate-fade-in {
+  animation: fadeIn 2.5s ease-in-out forwards;
+}

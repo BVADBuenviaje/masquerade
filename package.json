@@ -16,7 +16,8 @@
   "workspaces": [
     "client",
     "server",
-    "shared"
+    "shared",
+    "bot"
   ],
   "dependencies": {
     "@masquerade/shared": "^1.0.0",

@@ -42,7 +42,7 @@ io.on('connection', (socket: Socket) => {
       id: roomCode,
       players: [newPlayer],
       state: 'Lobby',
-      settings: { turnDuration: 10, maxRounds: 5, discussionLength: 60 },
+      settings: { turnDuration: 20, maxRounds: 5, discussionLength: 60 },
       currentRound: 1,
       activePlayerId: null,
       wordHistory: [],
@@ -132,6 +132,33 @@ io.on('connection', (socket: Socket) => {
     }
   });
 
+  socket.on('force_skip', (roomCode: string) => {
+    const room = rooms.get(roomCode);
+    if (room && room.state === 'TurnBased' && !room.isPaused) {
+      const isHost = room.players.find(p => p.id === socket.id)?.isHost;
+      if (isHost && room.activePlayerId) {
+        room.wordHistory.push({ playerId: room.activePlayerId, word: 'LATE' });
+        
+        const currentIndex = room.players.findIndex(p => p.id === room.activePlayerId);
+        const nextIndex = (currentIndex + 1) % room.players.length;
+        
+        if (room.wordHistory.length % room.players.length === 0) {
+          room.currentRound += 1;
+        }
+        
+        if (room.currentRound > room.settings.maxRounds) {
+          room.state = 'Voting';
+          room.activePlayerId = null;
+          room.players.forEach(p => p.vote = undefined);
+        } else {
+          room.activePlayerId = room.players[nextIndex].id;
+        }
+        
+        io.to(roomCode).emit('room_updated', room);
+      }
+    }
+  });
+
   socket.on('update_name', ({ roomCode, name }: { roomCode: string, name: string }) => {
     const room = rooms.get(roomCode);
     if (room && name && typeof name === 'string') {
@@ -179,7 +206,7 @@ const WORDS = ['APPLE', 'BANANA', 'CARROT', 'DOG', 'EAGLE', 'FALCON', 'GUITAR', 
 
   socket.on('start_game', (roomCode: string) => {
     const room = rooms.get(roomCode);
-    if (room) {
+    if (room && room.players.length >= 3) {
       const player = room.players.find(p => p.id === socket.id);
       if (player && player.isHost) {
         room.state = 'Starting';
@@ -190,6 +217,20 @@ const WORDS = ['APPLE', 'BANANA', 'CARROT', 'DOG', 'EAGLE', 'FALCON', 'GUITAR', 
           assignRolesAndWord(roomCode, room);
         }, 3000);
       }
+    }
+  });
+
+  socket.on('add_bot', (roomCode: string) => {
+    const room = rooms.get(roomCode);
+    if (room && room.players.find(p => p.id === socket.id)?.isHost) {
+      const { spawn } = require('child_process');
+      const botProcess = spawn('node', ['-r', 'ts-node/register', 'src/index.ts', roomCode], {
+        cwd: path.join(__dirname, '..', 'bot'),
+        detached: true,
+        stdio: 'ignore',
+        windowsHide: true
+      });
+      botProcess.unref();
     }
   });
 
@@ -263,6 +304,24 @@ const WORDS = ['APPLE', 'BANANA', 'CARROT', 'DOG', 'EAGLE', 'FALCON', 'GUITAR', 
       room.currentRound = 1;
       room.wordHistory = [];
       assignRolesAndWord(roomCode, room);
+    }
+  });
+
+  socket.on('back_to_lobby', (roomCode: string) => {
+    const room = rooms.get(roomCode);
+    if (room && room.players.find(p => p.id === socket.id)?.isHost) {
+      room.state = 'Lobby';
+      room.currentRound = 1;
+      room.wordHistory = [];
+      room.activePlayerId = null;
+      room.winner = null;
+      room.word = undefined;
+      room.players.forEach(p => {
+        p.role = 'Unassigned';
+        p.eliminated = false;
+        p.vote = undefined;
+      });
+      io.to(roomCode).emit('room_updated', room);
     }
   });
 
