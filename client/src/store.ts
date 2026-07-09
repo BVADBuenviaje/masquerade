@@ -2,7 +2,7 @@ import { create } from 'zustand';
 import { io, Socket } from 'socket.io-client';
 import type { Room } from '@masquerade/shared';
 
-const URL = 'http://localhost:3001';
+const URL = import.meta.env.VITE_SERVER_URL || (import.meta.env.PROD ? '' : 'http://localhost:3001');
 export const socket: Socket = io(URL);
 
 interface GameState {
