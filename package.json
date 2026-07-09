@@ -18,9 +18,5 @@
     "server",
     "shared",
     "bot"
-  ],
-  "dependencies": {
-    "@masquerade/shared": "^1.0.0",
-    "zustand": "^5.0.14"
-  }
+  ]
 }
