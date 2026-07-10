@@ -483,7 +483,8 @@ function App() {
               )}
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
 
               {/* Left Column: Players */}
               {room.state !== 'Voting' && (
@@ -571,10 +572,9 @@ function App() {
                   </div>
                 )}
 
-                {/* End Phase */}
+                {/* End Phase Main Card */}
                 {room.state === 'End' && (
-                  <div className="space-y-6">
-                    <div className="bg-slate-900 border-2 border-amber-500/50 p-8 rounded-lg text-center shadow-[0_0_30px_rgba(245,158,11,0.15)]">
+                  <div className="bg-slate-900 border-2 border-amber-500/50 p-8 rounded-lg text-center shadow-[0_0_30px_rgba(245,158,11,0.15)]">
                       <h3 className={`text-5xl font-black tracking-widest uppercase mb-8 ${room.winner === 'Innocents' ? 'text-emerald-500 drop-shadow-[0_0_15px_rgba(16,185,129,0.5)]' : 'text-red-500 drop-shadow-[0_0_15px_rgba(239,68,68,0.5)]'}`}>
                         {room.winner === 'Innocents' ? 'INNOCENTS WIN' : 'IMPOSTOR WINS'}
                       </h3>
@@ -609,38 +609,40 @@ function App() {
                       {!isHost && (
                         <p className="text-slate-500 font-bold uppercase tracking-widest">Waiting for host to play again...</p>
                       )}
-                    </div>
-
-                    {/* Lower Results Grid */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                      <div className="bg-slate-900 p-6 rounded-lg border border-slate-800 shadow-[0_0_20px_rgba(0,0,0,0.3)]">
-                        <p className="text-slate-500 font-black tracking-widest uppercase mb-4 text-center">VOTING SUMMARY</p>
-                        <ul className="text-sm space-y-3 text-slate-400">
-                          {room.players.map(p => {
-                            const target = room.players.find(t => t.id === p.vote);
-                            return (
-                              <li key={p.id} className="flex items-center justify-between gap-2 border-b border-slate-800/50 pb-2 last:border-0 last:pb-0">
-                                <span className={`font-bold ${p.role === 'Impostor' ? 'text-red-500' : 'text-amber-500'}`}>{p.name}</span>
-                                <span className="text-xs text-slate-600 uppercase tracking-widest">voted for</span>
-                                <span className="font-bold text-slate-200">{target ? target.name : 'No one'}</span>
-                              </li>
-                            );
-                          })}
-                        </ul>
-                      </div>
-                      
-                      <div className="bg-slate-900 p-6 rounded-lg border border-slate-800 shadow-[0_0_20px_rgba(0,0,0,0.3)] flex flex-col items-center justify-center text-center">
-                        <p className="text-slate-500 font-black tracking-widest uppercase mb-4">THE SECRET WORD WAS</p>
-                        <p className="text-4xl md:text-5xl font-black tracking-widest text-amber-400 drop-shadow-[0_0_15px_rgba(245,158,11,0.5)]">
-                          {room.word}
-                        </p>
-                      </div>
-                    </div>
                   </div>
                 )}
               </div>
             </div>
-          )}
+
+            {/* Lower Results Grid - Spans full width below main row */}
+            {room.state === 'End' && (
+              <div className="mt-8 grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div className="bg-slate-900 p-6 rounded-lg border border-slate-800 shadow-[0_0_20px_rgba(0,0,0,0.3)]">
+                  <p className="text-slate-500 font-black tracking-widest uppercase mb-4 text-center">VOTING SUMMARY</p>
+                  <ul className="text-sm space-y-3 text-slate-400">
+                    {room.players.map(p => {
+                      const target = room.players.find(t => t.id === p.vote);
+                      return (
+                        <li key={p.id} className="flex items-center justify-between gap-2 border-b border-slate-800/50 pb-2 last:border-0 last:pb-0">
+                          <span className={`font-bold ${p.role === 'Impostor' ? 'text-red-500' : 'text-amber-500'}`}>{p.name}</span>
+                          <span className="text-xs text-slate-600 uppercase tracking-widest">voted for</span>
+                          <span className="font-bold text-slate-200">{target ? target.name : 'No one'}</span>
+                        </li>
+                      );
+                    })}
+                  </ul>
+                </div>
+                
+                <div className="bg-slate-900 p-6 rounded-lg border border-slate-800 shadow-[0_0_20px_rgba(0,0,0,0.3)] flex flex-col items-center justify-center text-center">
+                  <p className="text-slate-500 font-black tracking-widest uppercase mb-4">THE SECRET WORD WAS</p>
+                  <p className="text-4xl md:text-5xl font-black tracking-widest text-amber-400 drop-shadow-[0_0_15px_rgba(245,158,11,0.5)]">
+                    {room.word}
+                  </p>
+                </div>
+              </div>
+            )}
+          </>
+        )}
         </div>
       )}
     </div>
