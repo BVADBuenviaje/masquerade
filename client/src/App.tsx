@@ -484,17 +484,17 @@ function App() {
             </div>
           ) : (
             <>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+              <div className="flex flex-col md:grid md:grid-cols-3 gap-8">
 
               {/* Left Column: Players */}
               {room.state !== 'Voting' && (
-                <div className="space-y-6 md:col-span-1">
+                <div className="order-2 md:order-1 space-y-6 md:col-span-1">
                   {playersCard}
                 </div>
               )}
 
               {/* Right Column: Game Board */}
-              <div className={`space-y-6 ${room.state === 'Voting' ? 'md:col-span-3' : 'md:col-span-2'}`}>
+              <div className={`order-1 md:order-2 space-y-6 ${room.state === 'Voting' ? 'md:col-span-3' : 'md:col-span-2'}`}>
 
                 {/* Intermediate Reveal (Discussion) */}
                 {room.state === 'Discussion' && (
@@ -616,8 +616,8 @@ function App() {
 
             {/* Lower Results Grid - Spans full width below main row */}
             {room.state === 'End' && (
-              <div className="mt-8 grid grid-cols-1 md:grid-cols-2 gap-8">
-                <div className="bg-slate-900 p-6 rounded-lg border border-slate-800 shadow-[0_0_20px_rgba(0,0,0,0.3)]">
+              <div className="mt-8 flex flex-col md:grid md:grid-cols-2 gap-8">
+                <div className="order-2 md:order-1 bg-slate-900 p-6 rounded-lg border border-slate-800 shadow-[0_0_20px_rgba(0,0,0,0.3)]">
                   <p className="text-slate-500 font-black tracking-widest uppercase mb-4 text-center">VOTING SUMMARY</p>
                   <ul className="text-sm space-y-3 text-slate-400">
                     {room.players.map(p => {
@@ -633,7 +633,7 @@ function App() {
                   </ul>
                 </div>
                 
-                <div className="bg-slate-900 p-6 rounded-lg border border-slate-800 shadow-[0_0_20px_rgba(0,0,0,0.3)] flex flex-col items-center justify-center text-center">
+                <div className="order-1 md:order-2 bg-slate-900 p-6 rounded-lg border border-slate-800 shadow-[0_0_20px_rgba(0,0,0,0.3)] flex flex-col items-center justify-center text-center">
                   <p className="text-slate-500 font-black tracking-widest uppercase mb-4">THE SECRET WORD WAS</p>
                   <p className="text-4xl md:text-5xl font-black tracking-widest text-amber-400 drop-shadow-[0_0_15px_rgba(245,158,11,0.5)]">
                     {room.word}
