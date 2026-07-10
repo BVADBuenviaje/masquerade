@@ -236,7 +236,8 @@ const WORDS = ['APPLE', 'BANANA', 'CARROT', 'DOG', 'EAGLE', 'FALCON', 'GUITAR', 
     const room = rooms.get(roomCode);
     if (room && room.players.find(p => p.id === socket.id)?.isHost) {
       // Broadcast to any connected Bot Managers to spawn a new bot
-      io.emit('spawn_bot', roomCode);
+      console.log(`Broadcasting spawn_bot for room: ${roomCode}`);
+      io.emit('spawn_bot', { roomCode });
     }
   });
 

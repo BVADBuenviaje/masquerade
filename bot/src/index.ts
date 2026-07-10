@@ -27,8 +27,8 @@ managerSocket.on('connect', () => {
   console.log(`[Bot Manager] Listening for bot spawn requests...`);
 });
 
-managerSocket.on('spawn_bot', (roomCode: string) => {
-  console.log(`[Bot Manager] Received request to spawn bot in room ${roomCode}`);
+managerSocket.on('spawn_bot', ({ roomCode }: { roomCode: string }) => {
+  console.log(`[Bot Manager] Received request to spawn bot for room: ${roomCode}`);
   spawnBot(roomCode);
 });
 
