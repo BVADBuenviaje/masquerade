@@ -168,8 +168,18 @@ function App() {
                   <span className={`font-bold tracking-wide uppercase truncate ${isMe ? 'text-amber-400' : 'text-slate-300'}`}>
                     {p.name}
                   </span>
-                  {isMe && (
-                    <button onClick={() => { setTempName(p.name); setEditingName(true); }} className="text-slate-500 hover:text-amber-400 transition-colors shrink-0">
+                  {(isMe || (isHost && p.isBot)) && (
+                    <button onClick={() => { 
+                      if (isMe) { 
+                        setTempName(p.name); 
+                        setEditingName(true); 
+                      } else if (isHost && p.isBot) {
+                        const newName = prompt('Enter new name for ' + p.name + ':');
+                        if (newName && newName.trim().length > 0) {
+                          socket.emit('rename_bot', { roomCode: room.id, botId: p.id, newName: newName.trim().substring(0, 16) });
+                        }
+                      }
+                    }} className="text-slate-500 hover:text-amber-400 transition-colors shrink-0">
                       <Edit2 size={16} />
                     </button>
                   )}

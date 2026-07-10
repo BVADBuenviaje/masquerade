@@ -5,6 +5,7 @@ export interface Player {
   name: string;
   eliminated?: boolean;
   vote?: string;
+  isBot?: boolean;
 }
 
 export interface RoomSettings {

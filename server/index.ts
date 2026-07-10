@@ -54,15 +54,27 @@ io.on('connection', (socket: Socket) => {
     io.to(roomCode).emit('room_updated', rooms.get(roomCode));
   });
 
-  socket.on('join_room', (roomCode: string) => {
+  socket.on('join_room', (roomCode: string, botFlag?: string) => {
     const room = rooms.get(roomCode);
     if (room) {
-      const newPlayer: Player = { id: socket.id, isHost: false, name: generateUniqueName(room) };
+      const isBot = botFlag === 'Bot-Pending';
+      const newPlayer: Player = { id: socket.id, isHost: false, name: generateUniqueName(room), isBot };
       room.players.push(newPlayer);
       socket.join(roomCode);
       io.to(roomCode).emit('room_updated', room);
     } else {
       socket.emit('error', 'Room not found');
+    }
+  });
+
+  socket.on('rename_bot', ({ roomCode, botId, newName }: { roomCode: string, botId: string, newName: string }) => {
+    const room = rooms.get(roomCode);
+    if (room && room.players.find(p => p.id === socket.id)?.isHost) {
+      const target = room.players.find(p => p.id === botId);
+      if (target && target.isBot) {
+        target.name = newName;
+        io.to(roomCode).emit('room_updated', room);
+      }
     }
   });
 
