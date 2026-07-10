@@ -235,14 +235,8 @@ const WORDS = ['APPLE', 'BANANA', 'CARROT', 'DOG', 'EAGLE', 'FALCON', 'GUITAR', 
   socket.on('add_bot', (roomCode: string) => {
     const room = rooms.get(roomCode);
     if (room && room.players.find(p => p.id === socket.id)?.isHost) {
-      const { spawn } = require('child_process');
-      const botProcess = spawn('node', ['-r', 'ts-node/register', 'src/index.ts', roomCode], {
-        cwd: path.join(__dirname, '..', 'bot'),
-        detached: true,
-        stdio: 'ignore',
-        windowsHide: true
-      });
-      botProcess.unref();
+      // Broadcast to any connected Bot Managers to spawn a new bot
+      io.emit('spawn_bot', roomCode);
     }
   });
 
