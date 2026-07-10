@@ -4,7 +4,9 @@
   "description": "Headless AI Bot for Masquerade",
   "main": "src/index.ts",
   "scripts": {
-    "start": "ts-node src/index.ts"
+    "build": "tsc",
+    "start": "ts-node src/index.ts",
+    "start:prod": "node dist/index.js"
   },
   "dependencies": {
     "@masquerade/shared": "^1.0.0",
