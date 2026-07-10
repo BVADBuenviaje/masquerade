@@ -575,7 +575,7 @@ function App() {
                 {/* End Phase Main Card */}
                 {room.state === 'End' && (
                   <div className="bg-slate-900 border-2 border-amber-500/50 p-8 rounded-lg text-center shadow-[0_0_30px_rgba(245,158,11,0.15)]">
-                      <h3 className={`text-5xl font-black tracking-widest uppercase mb-8 ${room.winner === 'Innocents' ? 'text-emerald-500 drop-shadow-[0_0_15px_rgba(16,185,129,0.5)]' : 'text-red-500 drop-shadow-[0_0_15px_rgba(239,68,68,0.5)]'}`}>
+                      <h3 className={`text-4xl md:text-5xl font-black tracking-widest uppercase mb-8 ${room.winner === 'Innocents' ? 'text-emerald-500 drop-shadow-[0_0_15px_rgba(16,185,129,0.5)]' : 'text-red-500 drop-shadow-[0_0_15px_rgba(239,68,68,0.5)]'}`}>
                         {room.winner === 'Innocents' ? 'INNOCENTS WIN' : 'IMPOSTOR WINS'}
                       </h3>
 
