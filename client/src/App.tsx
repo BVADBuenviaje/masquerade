@@ -583,6 +583,22 @@ function App() {
                           )}
                         </ul>
                       </div>
+                      
+                      <div className="pt-4 mt-4 border-t border-slate-800">
+                        <p className="text-slate-500 font-bold tracking-widest uppercase mb-3">Voting Summary:</p>
+                        <ul className="text-sm space-y-2 text-slate-400">
+                          {room.players.map(p => {
+                            const target = room.players.find(t => t.id === p.vote);
+                            return (
+                              <li key={p.id} className="flex items-center gap-2">
+                                <span className={`font-bold ${p.role === 'Impostor' ? 'text-red-500' : 'text-amber-500'}`}>{p.name}</span>
+                                <span>voted for</span>
+                                <span className="font-bold text-slate-200">{target ? target.name : 'No one'}</span>
+                              </li>
+                            );
+                          })}
+                        </ul>
+                      </div>
                     </div>
 
                     {isHost && (
