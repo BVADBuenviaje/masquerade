@@ -462,7 +462,10 @@ function App() {
               {isHost && (
                 <div className="flex flex-col gap-4">
                   <button
-                    onClick={() => socket.emit('add_bot', room.id)}
+                    onClick={() => {
+                      console.log("Add AI Bot button clicked!");
+                      socket.emit('add_bot', room.id);
+                    }}
                     className="py-4 px-8 rounded font-black tracking-widest uppercase transition-colors bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 shadow-[0_0_15px_rgba(0,0,0,0.4)] whitespace-nowrap"
                   >
                     ADD AI BOT

@@ -233,6 +233,7 @@ const WORDS = ['APPLE', 'BANANA', 'CARROT', 'DOG', 'EAGLE', 'FALCON', 'GUITAR', 
   });
 
   socket.on('add_bot', (roomCode: string) => {
+    console.log("Server received 'add_bot' request for room:", roomCode);
     const room = rooms.get(roomCode);
     if (room && room.players.find(p => p.id === socket.id)?.isHost) {
       // Broadcast to any connected Bot Managers to spawn a new bot
