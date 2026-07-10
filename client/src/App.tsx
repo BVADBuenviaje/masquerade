@@ -59,6 +59,20 @@ function App() {
       setTimeout(() => setCopied(false), 2000);
     }
   };
+
+  const handleAddBot = () => {
+    console.log("Add AI Bot clicked. Socket state:", socket.connected ? "Connected" : "Disconnected");
+    console.log("Socket ID:", socket.id);
+  
+    if (!socket.connected) {
+      console.error("Cannot add bot: Socket not connected.");
+      return;
+    }
+  
+    socket.emit('add_bot', room?.id, (response: any) => {
+      console.log("Server acknowledgment:", response);
+    });
+  };
   const handleUpdateName = () => {
     if (room && tempName.trim()) {
       socket.emit('update_name', { roomCode: room.id, name: tempName });
@@ -462,10 +476,7 @@ function App() {
               {isHost && (
                 <div className="flex flex-col gap-4">
                   <button
-                    onClick={() => {
-                      console.log("Add AI Bot button clicked!");
-                      socket.emit('add_bot', room.id);
-                    }}
+                    onClick={handleAddBot}
                     className="py-4 px-8 rounded font-black tracking-widest uppercase transition-colors bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 shadow-[0_0_15px_rgba(0,0,0,0.4)] whitespace-nowrap"
                   >
                     ADD AI BOT

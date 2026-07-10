@@ -232,13 +232,16 @@ const WORDS = ['APPLE', 'BANANA', 'CARROT', 'DOG', 'EAGLE', 'FALCON', 'GUITAR', 
     }
   });
 
-  socket.on('add_bot', (roomCode: string) => {
+  socket.on('add_bot', (roomCode: string, callback?: (res: any) => void) => {
     console.log("Server received 'add_bot' request for room:", roomCode);
     const room = rooms.get(roomCode);
     if (room && room.players.find(p => p.id === socket.id)?.isHost) {
       // Broadcast to any connected Bot Managers to spawn a new bot
       console.log(`Broadcasting spawn_bot for room: ${roomCode}`);
       io.emit('spawn_bot', { roomCode });
+      if (callback) callback({ success: true });
+    } else {
+      if (callback) callback({ success: false, error: "Not host or room not found" });
     }
   });
 
