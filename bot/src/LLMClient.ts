@@ -91,12 +91,13 @@ Provide a single-word clue that proves you know the word without making it too o
   static async generateVote(
     role: string,
     players: Player[],
-    wordHistory: { playerId: string; word: string }[]
-  ): Promise<string> {
+    wordHistory: { playerId: string; word: string }[],
+    suspicionMap: Record<string, number> = {}
+  ): Promise<{ targetId: string, reasoning: string }> {
     const aiClient = getModel();
     if (!aiClient) {
       console.warn("GROQ_API_KEY not set! Falling back to first player's vote.");
-      return players[0]?.id || "";
+      return { targetId: players[0]?.id || "", reasoning: "Fallback due to missing API key." };
     }
 
     const playerList = players.map(p => `- ${p.name} (ID: ${p.id})`).join("\n");
@@ -105,41 +106,69 @@ Provide a single-word clue that proves you know the word without making it too o
       return `${p?.name || entry.playerId}: ${entry.word}`;
     }).join("\n");
 
+    const suspicionList = Object.entries(suspicionMap).map(([id, score]) => {
+      const pName = players.find(p => p.id === id)?.name || id;
+      return `${pName}: ${score}`;
+    }).join("\n");
+
     let systemPrompt = "";
     let userPrompt = "";
     if (role === 'Impostor') {
-      systemPrompt = "You are playing Masquerade. You are the IMPOSTOR. Constraint: Output a valid JSON object containing exactly one key 'vote' mapped to the player ID you choose. Example: {\"vote\": \"<PLAYER_ID>\"}";
+      systemPrompt = "You are playing Masquerade. You are the IMPOSTOR. Constraint: Output a valid JSON object containing 'reasoning' (your brief internal monologue) and 'targetId' (the player ID to vote for). Example: {\"reasoning\": \"I need to deflect suspicion.\", \"targetId\": \"<PLAYER_ID>\"}. You must NEVER vote for yourself. Keep the response concise.";
       userPrompt = `The other players are trying to vote you out.
 Analyze the clues:
 ${cluesList}
 
+Current Suspicion Levels (higher means more suspicious):
+${suspicionList || "None"}
+
 Pick one Innocent player ID from this list to vote for to deflect suspicion and blend in:
 ${playerList}`;
     } else {
-      systemPrompt = "You are playing Masquerade. It is time to vote for the Impostor. Constraint: Output a valid JSON object containing exactly one key 'vote' mapped to the player ID you choose. Example: {\"vote\": \"<PLAYER_ID>\"}";
+      systemPrompt = "You are playing Masquerade. It is time to vote for the Impostor. Constraint: Output a valid JSON object containing 'reasoning' (your brief internal monologue about who is most suspicious and why) and 'targetId' (the player ID to vote for). Example: {\"reasoning\": \"Their clue was weird.\", \"targetId\": \"<PLAYER_ID>\"}. You must NEVER vote for yourself. Keep the response concise.";
       userPrompt = `Players:
 ${playerList}
 
 Clues given:
 ${cluesList}
 
-Analyze the clues to find the player who gave a suspicious or disjointed clue. Output your JSON vote.`;
+Current Suspicion Levels (higher means more suspicious):
+${suspicionList || "None"}
+
+Analyze the clues and suspicion levels to find the player who gave a suspicious or disjointed clue. Output your JSON vote.`;
     }
 
     try {
       const responseText = await this.generateWithRetry(systemPrompt, userPrompt, true);
       try {
-        const parsed = JSON.parse(responseText);
-        return parsed.vote || players[0]?.id || "";
+        // Strip out markdown code blocks if the LLM adds them
+        const cleanedText = responseText.replace(/```json/g, '').replace(/```/g, '').trim();
+        const parsed = JSON.parse(cleanedText);
+        
+        let foundId = parsed.targetId || parsed.vote;
+        
+        // Try mapping name to ID if it returned a name instead of ID
+        if (foundId && !players.find(p => p.id === foundId)) {
+          const matchedPlayer = players.find(p => p.name.toLowerCase() === foundId.toLowerCase());
+          if (matchedPlayer) foundId = matchedPlayer.id;
+        }
+
+        return { 
+          targetId: foundId || players[0]?.id || "", 
+          reasoning: parsed.reasoning || "No reasoning provided." 
+        };
       } catch (e) {
         // Fallback to regex extraction if JSON parsing fails for any reason
-        const match = responseText.match(/"vote"\s*:\s*"([^"]+)"/);
-        if (match && match[1]) return match[1];
-        return players[0]?.id || "";
+        const match = responseText.match(/"targetId"\s*:\s*"([^"]+)"/);
+        const matchOld = responseText.match(/"vote"\s*:\s*"([^"]+)"/);
+        return { 
+          targetId: (match && match[1]) || (matchOld && matchOld[1]) || players[0]?.id || "", 
+          reasoning: "Failed to parse reasoning." 
+        };
       }
     } catch (err) {
       console.error("Error generating vote after retries:", err);
-      return players[0]?.id || "";
+      return { targetId: players[0]?.id || "", reasoning: "Generation failed." };
     }
   }
 }

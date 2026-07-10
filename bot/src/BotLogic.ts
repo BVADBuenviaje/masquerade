@@ -6,9 +6,15 @@ export class BotLogic {
   private socket: Socket;
   private currentRoom: Room | null = null;
   private actionInProgress = false;
+  private suspicionMap: Record<string, number> = {};
 
   constructor(socket: Socket) {
     this.socket = socket;
+  }
+
+  public updateSuspicion(targetId: string, delta: number) {
+    if (!this.suspicionMap[targetId]) this.suspicionMap[targetId] = 0;
+    this.suspicionMap[targetId] += delta;
   }
 
   public updateRoom(room: Room) {
@@ -56,11 +62,12 @@ export class BotLogic {
           const activeRoom = this.currentRoom;
           if (!activeRoom) return;
           if (activeRoom.state === 'Voting') {
-             const otherPlayers = activeRoom.players.filter(p => p.id !== this.socket.id && !p.eliminated);
-             if (otherPlayers.length > 0) {
-               const voteId = await LLMClient.generateVote(botPlayer.role || 'Innocent', otherPlayers, activeRoom.wordHistory);
-               this.socket.emit('submit_vote', { roomCode: activeRoom.id, targetPlayerId: voteId });
-             }
+              const otherPlayers = activeRoom.players.filter(p => p.id !== this.socket.id && !p.eliminated);
+              if (otherPlayers.length > 0) {
+                const voteData = await LLMClient.generateVote(botPlayer.role || 'Innocent', otherPlayers, activeRoom.wordHistory, this.suspicionMap);
+                console.log(`[Bot ${this.socket.id}] Detective Reasoning: ${voteData.reasoning}`);
+                this.socket.emit('submit_vote', { roomCode: activeRoom.id, targetPlayerId: voteData.targetId });
+              }
           }
         } catch (err) {
           console.error("Failed to generate vote", err);
