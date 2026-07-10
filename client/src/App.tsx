@@ -573,57 +573,69 @@ function App() {
 
                 {/* End Phase */}
                 {room.state === 'End' && (
-                  <div className="bg-slate-900 border-2 border-amber-500/50 p-8 rounded-lg text-center shadow-[0_0_30px_rgba(245,158,11,0.15)]">
-                    <h3 className={`text-5xl font-black tracking-widest uppercase mb-8 ${room.winner === 'Innocents' ? 'text-emerald-500 drop-shadow-[0_0_15px_rgba(16,185,129,0.5)]' : 'text-red-500 drop-shadow-[0_0_15px_rgba(239,68,68,0.5)]'}`}>
-                      {room.winner === 'Innocents' ? 'INNOCENTS WIN' : 'IMPOSTOR WINS'}
-                    </h3>
+                  <div className="space-y-6">
+                    <div className="bg-slate-900 border-2 border-amber-500/50 p-8 rounded-lg text-center shadow-[0_0_30px_rgba(245,158,11,0.15)]">
+                      <h3 className={`text-5xl font-black tracking-widest uppercase mb-8 ${room.winner === 'Innocents' ? 'text-emerald-500 drop-shadow-[0_0_15px_rgba(16,185,129,0.5)]' : 'text-red-500 drop-shadow-[0_0_15px_rgba(239,68,68,0.5)]'}`}>
+                        {room.winner === 'Innocents' ? 'INNOCENTS WIN' : 'IMPOSTOR WINS'}
+                      </h3>
 
-                    <div className="space-y-4 mb-8 text-left max-w-sm mx-auto bg-slate-950 p-6 rounded border border-slate-800">
-                      <p className="text-slate-400 font-bold tracking-widest uppercase">
-                        The Impostor was: <span className="text-red-500">{room.players.find(p => p.role === 'Impostor')?.name}</span>
-                      </p>
-                      <div>
-                        <p className="text-slate-500 font-bold tracking-widest uppercase mb-2">Eliminated Players:</p>
-                        <ul className="list-disc list-inside text-slate-300 font-bold">
-                          {room.players.filter(p => p.eliminated).map(p => (
-                            <li key={p.id}>{p.name}</li>
-                          ))}
-                          {room.players.filter(p => p.eliminated).length === 0 && (
-                            <li className="text-slate-600">No one was eliminated.</li>
-                          )}
-                        </ul>
+                      <div className="space-y-4 mb-8 text-left max-w-sm mx-auto bg-slate-950 p-6 rounded border border-slate-800">
+                        <p className="text-slate-400 font-bold tracking-widest uppercase">
+                          The Impostor was: <span className="text-red-500">{room.players.find(p => p.role === 'Impostor')?.name}</span>
+                        </p>
+                        <div>
+                          <p className="text-slate-500 font-bold tracking-widest uppercase mb-2">Eliminated Players:</p>
+                          <ul className="list-disc list-inside text-slate-300 font-bold">
+                            {room.players.filter(p => p.eliminated).map(p => (
+                              <li key={p.id}>{p.name}</li>
+                            ))}
+                            {room.players.filter(p => p.eliminated).length === 0 && (
+                              <li className="text-slate-600">No one was eliminated.</li>
+                            )}
+                          </ul>
+                        </div>
                       </div>
-                      
-                      <div className="pt-4 mt-4 border-t border-slate-800">
-                        <p className="text-slate-500 font-bold tracking-widest uppercase mb-3">Voting Summary:</p>
-                        <ul className="text-sm space-y-2 text-slate-400">
+
+                      {isHost && (
+                        <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                          <button onClick={handlePlayAgain} className="bg-amber-600 hover:bg-amber-500 text-slate-950 px-8 py-4 w-full sm:w-auto rounded font-black tracking-widest uppercase transition-colors shadow-[0_0_15px_rgba(245,158,11,0.4)]">
+                            PLAY AGAIN
+                          </button>
+                          <button onClick={handleBackToLobby} className="bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 px-8 py-4 w-full sm:w-auto rounded font-black tracking-widest uppercase transition-colors shadow-[0_0_15px_rgba(0,0,0,0.4)]">
+                            BACK TO LOBBY
+                          </button>
+                        </div>
+                      )}
+                      {!isHost && (
+                        <p className="text-slate-500 font-bold uppercase tracking-widest">Waiting for host to play again...</p>
+                      )}
+                    </div>
+
+                    {/* Lower Results Grid */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <div className="bg-slate-900 p-6 rounded-lg border border-slate-800 shadow-[0_0_20px_rgba(0,0,0,0.3)]">
+                        <p className="text-slate-500 font-black tracking-widest uppercase mb-4 text-center">VOTING SUMMARY</p>
+                        <ul className="text-sm space-y-3 text-slate-400">
                           {room.players.map(p => {
                             const target = room.players.find(t => t.id === p.vote);
                             return (
-                              <li key={p.id} className="flex items-center gap-2">
+                              <li key={p.id} className="flex items-center justify-between gap-2 border-b border-slate-800/50 pb-2 last:border-0 last:pb-0">
                                 <span className={`font-bold ${p.role === 'Impostor' ? 'text-red-500' : 'text-amber-500'}`}>{p.name}</span>
-                                <span>voted for</span>
+                                <span className="text-xs text-slate-600 uppercase tracking-widest">voted for</span>
                                 <span className="font-bold text-slate-200">{target ? target.name : 'No one'}</span>
                               </li>
                             );
                           })}
                         </ul>
                       </div>
-                    </div>
-
-                    {isHost && (
-                      <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                        <button onClick={handlePlayAgain} className="bg-amber-600 hover:bg-amber-500 text-slate-950 px-8 py-4 w-full sm:w-auto rounded font-black tracking-widest uppercase transition-colors shadow-[0_0_15px_rgba(245,158,11,0.4)]">
-                          PLAY AGAIN
-                        </button>
-                        <button onClick={handleBackToLobby} className="bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 px-8 py-4 w-full sm:w-auto rounded font-black tracking-widest uppercase transition-colors shadow-[0_0_15px_rgba(0,0,0,0.4)]">
-                          BACK TO LOBBY
-                        </button>
+                      
+                      <div className="bg-slate-900 p-6 rounded-lg border border-slate-800 shadow-[0_0_20px_rgba(0,0,0,0.3)] flex flex-col items-center justify-center text-center">
+                        <p className="text-slate-500 font-black tracking-widest uppercase mb-4">THE SECRET WORD WAS</p>
+                        <p className="text-4xl md:text-5xl font-black tracking-widest text-amber-400 drop-shadow-[0_0_15px_rgba(245,158,11,0.5)]">
+                          {room.word}
+                        </p>
                       </div>
-                    )}
-                    {!isHost && (
-                      <p className="text-slate-500 font-bold uppercase tracking-widest">Waiting for host to play again...</p>
-                    )}
+                    </div>
                   </div>
                 )}
               </div>
