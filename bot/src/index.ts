@@ -1,7 +1,18 @@
 import 'dotenv/config';
+import http from 'http';
 import { io } from 'socket.io-client';
 import { Room } from '@masquerade/shared';
 import { BotLogic } from './BotLogic';
+
+// Dummy HTTP server to satisfy Render's port binding requirement
+const port = process.env.PORT || 10000;
+const server = http.createServer((req, res) => {
+  res.writeHead(200, { 'Content-Type': 'text/plain' });
+  res.end('Bot Manager is alive and listening for socket events.');
+});
+server.listen(port, () => {
+  console.log(`[Bot Manager] Dummy web server listening on port ${port} to satisfy Render health checks.`);
+});
 
 const SERVER_URL = process.env.SERVER_URL || 'http://localhost:3001';
 
