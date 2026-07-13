@@ -20,7 +20,11 @@ console.log(`[Bot Manager] Starting up...`);
 console.log(`[Bot Manager] Connecting to server at ${SERVER_URL}...`);
 
 // The Bot Manager establishes its own connection to listen for spawn requests
-const managerSocket = io(SERVER_URL);
+const managerSocket = io(SERVER_URL, {
+  reconnection: true,
+  reconnectionAttempts: 10,
+  reconnectionDelay: 5000,
+});
 
 managerSocket.on('connect', () => {
   console.log(`[Bot Manager] Connected with ID: ${managerSocket.id}`);
@@ -34,6 +38,10 @@ managerSocket.on('spawn_bot', ({ roomCode }: { roomCode: string }) => {
 
 managerSocket.on('disconnect', () => {
   console.log(`[Bot Manager] Disconnected from server.`);
+});
+
+managerSocket.on('reconnect', () => {
+  console.log("[Bot Manager] reconnected!");
 });
 
 function spawnBot(roomCode: string) {
